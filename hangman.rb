@@ -17,6 +17,7 @@ class Hangman
     @guesses_left = 6
     @incorrect_letters = []
     @wins_losses = [0, 0]
+    @points = 0
 
     get_guess
   end
@@ -50,6 +51,7 @@ class Hangman
   end
 
   def check_if_in_secret_word?(guess)
+    check_game if @guess == @secret_word
     @secret_word.include?(guess) ? count_occurences(guess) : update_incorrect_letters(guess)
   end
 
@@ -78,27 +80,31 @@ class Hangman
   end
 
   def check_game
-    if @word_display == @secret_word
+    if @word_display == @secret_word || @guess == @secret_word
       @wins_losses[0] += 1
+      @points += 1 unless @guess == @secret_word
+      @points += 10 if @guess == @secret_word
 
       puts @secret_word
       puts "congrats you won!"
-      puts "Wins: #{@wins_losses[0]}, losses: #{@wins_losses[1]}"
-      puts "Would you like to play again? y for yes, n for no"
-      answer = gets.chomp.downcase
-
-      reset_variables if answer == "y"
+      display_end_message
     elsif @guesses_left == 0
       @wins_losses[1] += 1
-      puts "You lost :(, the secret word was #{@secret_word}"
-      puts "Wins: #{@wins_losses[0]}, losses: #{@wins_losses[1]}"
-      puts "Would you like to play again? y for yes, n for no"
-      answer = gets.chomp.downcase
 
-      reset_variables if answer == "y"
+      puts "You lost :("
+      display_end_message
     else
       get_guess
     end
+  end
+
+  def display_end_message
+    puts "Secret word was #{@secret_word}"
+    puts "Wins: #{@wins_losses[0]}, losses: #{@wins_losses[1]}. Points: #{@points}"
+    puts "Would you like to play again? y for yes, n for no"
+    answer = gets.chomp.downcase
+
+    reset_variables if answer == "y"
   end
 end
 

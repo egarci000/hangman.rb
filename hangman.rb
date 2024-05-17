@@ -19,61 +19,60 @@ class Hangman
     @secret_word = get_secret_word
     @word_display = get_word_display
     @guesses_left = 7
-    @count = 0
     @incorrect_letters = []
     @letters_entered = []
     @wins_losses = [0, 0]
     @points = 0
     @game_over = false
     @hangman_stages = [
-  "   |-----
-   |
-   |
-   |
-   |
-   |_________",
-  "   |-----
-   |    |
-   |
-   |
-   |
-   |_________",
-  "   |-----
-   |    |
-   |    O
-   |
-   |
-   |_________",
-  "   |-----
-   |    |
-   |    O
-   |   /
-   |
-   |_________",
-  "   |-----
-   |    |
-   |    O
-   |   /|
-   |
-   |_________",
-  "   |-----
-   |    |
-   |    O
-   |   /|\\
-   |
-   |_________",
-  "   |-----
-   |    |
-   |    O
-   |   /|\\
-   |   /
-   |_________",
-  "   |-----
-   |    |
-   |    O
-   |   /|\\
-   |   / \\
-   |_________"
+  "    |-----
+    |    |
+    |    O
+    |   /|\\
+    |   / \\
+    |_________",
+  "    |-----
+    |    |
+    |    O
+    |   /|\\
+    |   /
+    |_________",
+  "    |-----
+    |    |
+    |    O
+    |   /|\\
+    |
+    |_________",
+  "    |-----
+    |    |
+    |    O
+    |   /|
+    |
+    |_________",
+  "    |-----
+    |    |
+    |    O
+    |   /
+    |
+    |_________",
+  "    |-----
+    |    |
+    |    O
+    |
+    |
+    |_________",
+  "    |-----
+    |    |
+    |
+    |
+    |
+    |_________",
+  "    |-----
+    |
+    |
+    |
+    |
+    |_________"
   ]
 
     get_guess
@@ -83,7 +82,6 @@ class Hangman
     @secret_word = get_secret_word
     @word_display = get_word_display
     @guesses_left = 7
-    @count = 0
     @incorrect_letters = []
     @letters_entered = []
 
@@ -105,9 +103,11 @@ class Hangman
 
   def get_guess
     system("clear") || system("cls")
+    puts "Press ! to save game, ? to load a game file" if @guesses_left != 0
     puts update_hangman
+    puts "\n"
     puts @word_display
-    puts "incorrect guesses: #{@incorrect_letters.join(",")}"
+    puts "\nincorrect guesses: #{@incorrect_letters.join(",")}"
     if @guesses_left != 0
       puts "Please enter your guess, guesses left: #{@guesses_left} "
       @guess = gets.chomp.downcase
@@ -122,7 +122,7 @@ class Hangman
   end
 
   def check_if_in_secret_word?(guess)
-    check_game if @guess == @secret_word #&& @game_over
+    check_game if @guess == @secret_word && @game_over
     @secret_word.include?(guess) ? count_occurences(guess) : update_incorrect_letters(guess)
   end
 
@@ -146,13 +146,12 @@ class Hangman
   end
 
   def decrease_guesses
-    @count += 1
     @guesses_left -= 1
     check_game
   end
 
   def update_hangman
-    @hangman_stages[@count]
+    @hangman_stages[@guesses_left]
   end
 
   def check_game
@@ -160,19 +159,19 @@ class Hangman
       @wins_losses[0] += 1
       @points += 10 if @guess == @secret_word
 
-      puts "congrats you won!"
+      puts "\ncongrats you won!"
       display_end_message
     elsif @word_display == @secret_word
       @wins_losses[0] += 1
       @points += 1
 
-      puts "congrats you won!"
+      puts "\ncongrats you won!"
       display_end_message
     elsif @guesses_left == 0
       @wins_losses[1] += 1
 
       get_guess
-      puts "You lost :("
+      puts "\nYou lost :("
       display_end_message
     else
       get_guess
@@ -180,7 +179,7 @@ class Hangman
   end
 
   def display_end_message
-    puts "Secret word was #{@secret_word}"
+    puts "\n \nSecret word was #{@secret_word}"
     puts "guesses left: #{@guesses_left}"
     puts "Wins: #{@wins_losses[0]}, losses: #{@wins_losses[1]}. Points: #{@points}"
     puts "Would you like to play again? y for yes, n for no"

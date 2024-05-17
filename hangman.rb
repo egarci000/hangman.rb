@@ -18,11 +18,63 @@ class Hangman
     @guess = ""
     @secret_word = get_secret_word
     @word_display = get_word_display
-    @guesses_left = 10
+    @guesses_left = 7
+    @count = 0
     @incorrect_letters = []
+    @letters_entered = []
     @wins_losses = [0, 0]
     @points = 0
     @game_over = false
+    @hangman_stages = [
+  "   |-----
+   |
+   |
+   |
+   |
+   |_________",
+  "   |-----
+   |    |
+   |
+   |
+   |
+   |_________",
+  "   |-----
+   |    |
+   |    O
+   |
+   |
+   |_________",
+  "   |-----
+   |    |
+   |    O
+   |   /
+   |
+   |_________",
+  "   |-----
+   |    |
+   |    O
+   |   /|
+   |
+   |_________",
+  "   |-----
+   |    |
+   |    O
+   |   /|\\
+   |
+   |_________",
+  "   |-----
+   |    |
+   |    O
+   |   /|\\
+   |   /
+   |_________",
+  "   |-----
+   |    |
+   |    O
+   |   /|\\
+   |   / \\
+   |_________"
+  ]
 
     get_guess
   end
@@ -30,12 +82,16 @@ class Hangman
   def reset_variables
     @secret_word = get_secret_word
     @word_display = get_word_display
-    @guesses_left = 10
+    @guesses_left = 7
+    @count = 0
     @incorrect_letters = []
+    @letters_entered = []
 
     get_guess
   end
+
   attr_accessor :secret_word
+
   def get_secret_word
     secret_word = File.readlines("10k.txt").sample.chomp
     (secret_word.length >= 5 && secret_word.length <= 12) ? secret_word : get_secret_word
@@ -49,17 +105,24 @@ class Hangman
 
   def get_guess
     system("clear") || system("cls")
-    puts "Please enter your guess, guesses left: #{@guesses_left} "
+    puts update_hangman
     puts @word_display
     puts "incorrect guesses: #{@incorrect_letters.join(",")}"
-    @guess = gets.chomp.downcase
+    if @guesses_left != 0
+      puts "Please enter your guess, guesses left: #{@guesses_left} "
+      @guess = gets.chomp.downcase
 
-    check_if_in_secret_word?(@guess)
+      if @letters_entered.include?(@guess)
+        get_guess
+      else
+        @letters_entered.push(@guess)
+        check_if_in_secret_word?(@guess)
+      end
+    end
   end
 
   def check_if_in_secret_word?(guess)
-    # puts "hellooooooooooooooo"
-    check_game if @guess == @secret_word && @game_over
+    check_game if @guess == @secret_word #&& @game_over
     @secret_word.include?(guess) ? count_occurences(guess) : update_incorrect_letters(guess)
   end
 
@@ -83,11 +146,14 @@ class Hangman
   end
 
   def decrease_guesses
+    @count += 1
     @guesses_left -= 1
     check_game
   end
 
-  #check_if_in_secret_word > count_occurences > update_word_display > check_game is issue - keeps getting triggered when full word is guessed
+  def update_hangman
+    @hangman_stages[@count]
+  end
 
   def check_game
     if @guess == @secret_word
@@ -105,6 +171,7 @@ class Hangman
     elsif @guesses_left == 0
       @wins_losses[1] += 1
 
+      get_guess
       puts "You lost :("
       display_end_message
     else
@@ -123,6 +190,19 @@ class Hangman
       reset_variables
     else
       @game_over = true
+      save_score
+    end
+  end
+
+  def save_score
+    puts "Would you like to save your score, along with your win/loss record? y for yes, n for no"
+    answer = gets.chomp
+    f = File.open("scores.txt", "a")
+    if answer == "y"
+      puts "Please enter your name: "
+      name = gets.chomp
+      f.puts "#{name} score: #{@points}, win/loss record: #{@wins_losses[0]}W, #{@wins_losses[1]}L"
+      puts "Score saved!"
     end
   end
 end

@@ -11,13 +11,23 @@
 #start of every turn, direct user they can save game by pressing, "!", this will exit them out of the game, (cont.)
 #             save the Hangman class and its instance variables, then save them to a JSON file.
 #at the start of every game, allow the user to load in a saved game and display things correctly
-#add hangman functionality
+#add special scoring where a user receives points for how many empty spaces are left in the secret word when they enter the full secret word
+#       ex. word is cunning, user enters "cunning" when the word_display is: c-nn-ng, thus they get two points instead of 1
+
+#how to implement loading instance variables from file:
+#instance variables to be saved: @secret_word, @word_display, @guesses_left, @incorrect_letters,
+                                #@letters_entered, @wins_losses, @points
+#when user loads in file, unpack it, then call Hangman.new(input paramaters from file, in the order above)
+#give initialize optional parameters: def initialize(word=nil, word_display=nil, guesses_left=7, letters_entered=[],
+                                        #wins_losses=[0,0], points=0)
+#consult all knowing code god for further inquiries
+
 
 class Hangman
   def initialize
     @guess = ""
-    @secret_word = get_secret_word
-    @word_display = get_word_display
+    @secret_word = get_secret_word #|| word - place before method
+    @word_display = get_word_display #|| word_display - place before method
     @guesses_left = 7
     @incorrect_letters = []
     @letters_entered = []
@@ -75,7 +85,7 @@ class Hangman
     |_________"
   ]
 
-    get_guess
+    main_menu
   end
 
   def reset_variables
@@ -90,6 +100,40 @@ class Hangman
 
   attr_accessor :secret_word
 
+  def main_menu
+    system("clear") || system("cls")
+    puts "Press 1 to start a new game, 2 to load a previous game, 3 to view the scoring system, 4 to view high scores"
+    puts "Press any other key to exit"
+    answer = gets.chomp
+    case answer
+    when "1"
+      get_guess
+    when "2"
+      #load_game
+    when "3"
+      scoring_system
+    when "4"
+      high_scores
+    else
+      puts "Exiting"
+    end
+  end
+
+  def scoring_system
+    puts "In construction"
+    #explain scoring system
+    #puts "You receive points directly based on how many guesses were leftover. Points "
+  end
+
+  def high_scores
+    #reads file "scores.txt and prints it to the screen"
+    system("clear") || system("cls")
+    File.foreach("scores.txt") {|line| puts line}
+    puts "\nPress m to go back to the main menu"
+    answer = gets.chomp
+    main_menu if answer == "m"
+  end
+
   def get_secret_word
     secret_word = File.readlines("10k.txt").sample.chomp
     (secret_word.length >= 5 && secret_word.length <= 12) ? secret_word : get_secret_word
@@ -103,20 +147,23 @@ class Hangman
 
   def get_guess
     system("clear") || system("cls")
-    puts "Press ! to save game, ? to load a game file" if @guesses_left != 0
     puts update_hangman
-    puts "\n"
+    puts "\n\n"
     puts @word_display
-    puts "\nincorrect guesses: #{@incorrect_letters.join(",")}"
+    puts "\nincorrect guesses: #{@incorrect_letters.join(",")}\n\n"
     if @guesses_left != 0
-      puts "Please enter your guess, guesses left: #{@guesses_left} "
+      puts "Please enter your guess, guesses left: #{@guesses_left}. Press ! to save game "
       @guess = gets.chomp.downcase
 
-      if @letters_entered.include?(@guess)
-        get_guess
-      else
+      if @guess == "!"
+        save_game
+      elsif @guess == @secret_word
+        check_game
+      elsif @letters_entered.include?(@guess) == false && @guess.match(/[[:alpha:]]/) && @guess.length == 1
         @letters_entered.push(@guess)
         check_if_in_secret_word?(@guess)
+      else
+        get_guess
       end
     end
   end
@@ -157,13 +204,15 @@ class Hangman
   def check_game
     if @guess == @secret_word
       @wins_losses[0] += 1
-      @points += 10 if @guess == @secret_word
+      hash_of_tally = @word_display.split("").tally {|t| t == "-"}
+      count = hash_of_tally["-"] + @guesses_left
+      @points += count
 
       puts "\ncongrats you won!"
       display_end_message
     elsif @word_display == @secret_word
       @wins_losses[0] += 1
-      @points += 1
+      @points += @guesses_left
 
       puts "\ncongrats you won!"
       display_end_message

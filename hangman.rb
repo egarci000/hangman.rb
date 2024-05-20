@@ -128,17 +128,25 @@ class Hangman
       end
 
       print "\nEnter the number corresponding to the file you'd like to open: "
-      answer = gets.chomp
+      answer = gets.chomp.to_i
 
-      File.open("saved_games/#{Dir.children("saved_games").at(answer.to_i-1)}").each do |line|
-        $obj = JSON.parse(line)
+      if answer <= Dir.children("saved_games").length
+        File.open("saved_games/#{Dir.children("saved_games").at(answer-1)}").each do |line|
+          $obj = JSON.parse(line)
+        end
+      else
+        puts "No file found, please try again."
+        print "Enter b to go back to saved files: "
+        answer = gets.chomp.downcase
+
+        load_game if answer == "b"
       end
 
       begin
         $obj.keys.each do |key|
           instance_variable_set(key, $obj[key])
         end
-      rescue NoMethodError => e
+      rescue NoMethodError
         system("clear") || system("cls")
         print "No saved game data found, enter b to go back to saved files: "
         answer = gets.chomp.downcase

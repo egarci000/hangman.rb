@@ -1,1 +1,1 @@
-{"@secret_word":"creature","@word_display":"--------","@guesses_left":7,"@incorrect_letters":[],"@letters_entered":[],"@wins_losses":[25,16],"@points":112,"@load_game":false}
+{"@secret_word":"creature","@word_display":"--------","@guesses_left":7,"@incorrect_letters":["i","l","d"],"@letters_entered":["a","e","i","l","d","r","t","u"],"@wins_losses":[28,17],"@points":112,"@load_game":true}

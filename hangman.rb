@@ -8,6 +8,7 @@ class Hangman
     @guesses_left = guesses_left || 7
     @incorrect_letters = incorrect_letters || []
     @letters_entered = letters_entered || []
+    @keyboard = ('a'..'z').to_a
     @wins_losses = wins_losses || [0, 0]
     @points = points || 0
     @load_game = load_game || false
@@ -74,6 +75,7 @@ class Hangman
     @guesses_left = 7
     @incorrect_letters = []
     @letters_entered = []
+    @keyboard = ('a'..'z').to_a
     @game_over = false
 
     get_guess
@@ -102,7 +104,7 @@ class Hangman
   def save_game
     obj = {}
     instance_variables.map do |var|
-      unsaved_inst_vars = [:@guess, :@hangman_stages, :@game_over]
+      unsaved_inst_vars = [:@guess, :@keyboard, :@hangman_stages, :@game_over]
       obj[var] = instance_variable_get(var) unless unsaved_inst_vars.include?(var)
     end
 
@@ -154,16 +156,12 @@ class Hangman
       main_menu if answer == "m"
     end
 
-
-
     self.class.make_new_game($obj) if @game_over == false
   end
 
   def self.make_new_game(i_vars)
-    puts "was called"
     arr_of_instance_values = i_vars.values
     p arr_of_instance_values
-    puts @game_ove
 
     Hangman.new(arr_of_instance_values.at(0), arr_of_instance_values.at(1),
                 arr_of_instance_values.at(2), arr_of_instance_values.at(3),
@@ -204,9 +202,10 @@ class Hangman
   def get_guess
     system("clear") || system("cls")
     puts update_hangman
+    print "\n\n\nLetters available: #{@keyboard.join(" ")}\n\n\n"
     puts "\n\n"
     puts @word_display
-    puts "\nincorrect guesses: #{@incorrect_letters.join(",")}\n\n"
+    puts "\nIncorrect guesses: #{@incorrect_letters.join(",")}\n\n"
     if @game_over == false
       puts "Enter ! to save game"
       print "Please enter your guess:  "
@@ -218,6 +217,7 @@ class Hangman
         check_game
       elsif @letters_entered.include?(@guess) == false && @guess.match(/[[:alpha:]]/) && @guess.length == 1
         @letters_entered.push(@guess)
+        @keyboard.delete(@guess)
         check_if_in_secret_word?(@guess)
       else
         get_guess
@@ -254,7 +254,7 @@ class Hangman
   end
 
   def update_hangman
-    print "#{@hangman_stages[@guesses_left]}                guesses left:  #{@guesses_left}"
+    print "#{@hangman_stages[@guesses_left]}                Guesses left:  #{@guesses_left}"
   end
 
   def check_game
